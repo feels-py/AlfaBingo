@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Administração - Bingo Online</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        {% if not session.logged_in %}
+            <h1>Login Administrativo</h1>
+            {% if error %}
+                <p class="error">{{ error }}</p>
+            {% endif %}
+            <form method="POST" action="{{ url_for('admin') }}">
+                <div class="form-group">
+                    <label for="username">Usuário:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Senha:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit">Entrar</button>
+            </form>
+        {% else %}
+            <h1>Painel de Administração</h1>
+            <div class="admin-controls">
+                <div class="game-status">
+                    <h2>Status do Jogo</h2>
+                    <p>Números sorteados: {{ numbers_drawn|length }}/75</p>
+                    <p>Estado: {% if game_started %}Em andamento{% else %}Não iniciado{% endif %}</p>
+                </div>
+                
+                <div class="actions">
+                    <button id="drawNumber">Sortear Número</button>
+                    <button id="resetGame">Reiniciar Jogo</button>
+                    <a href="{{ url_for('logout') }}" class="logout-btn">Sair</a>
+                </div>
+                
+                <div class="numbers-drawn">
+                    <h2>Números Sorteados</h2>
+                    <div class="drawn-numbers-list">
+                        {% for num in numbers_drawn %}
+                            <span class="drawn-number">{{ num }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <script>
+                document.getElementById('drawNumber').addEventListener('click', async () => {
+                    const response = await fetch('/draw_number', {
+                        method: 'POST'
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        alert(`Número sorteado: ${data.number}`);
+                        location.reload();
+                    } else {
+                        const error = await response.json();
+                        alert(error.error);
+                    }
+                });
+                
+                document.getElementById('resetGame').addEventListener('click', async () => {
+                    if (confirm('Tem certeza que deseja reiniciar o jogo? Todos os números sorteados serão apagados.')) {
+                        const response = await fetch('/reset_game', {
+                            method: 'POST'
+                        });
+                        
+                        if (response.ok) {
+                            alert('Jogo reiniciado com sucesso!');
+                            location.reload();
+                        }
+                    }
+                });
+            </script>
+        {% endif %}
+    </div>
+</body>
+</html>
