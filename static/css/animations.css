@@ -1,0 +1,23 @@
+/* Animações para o Alfa Bingo */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.current-number {
+    animation: pulse 0.5s ease-in-out;
+}
+
+.drawn-number {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.winner-card {
+    animation: pulse 0.5s 3;
+}

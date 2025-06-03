@@ -1,84 +1,100 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Administração - Bingo Online</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <div class="container">
-        {% if not session.logged_in %}
-            <h1>Login Administrativo</h1>
-            {% if error %}
-                <p class="error">{{ error }}</p>
-            {% endif %}
-            <form method="POST" action="{{ url_for('admin') }}">
+{% extends "base.html" %}
+
+{% block title %}Painel de Administração - Bingo Premium{% endblock %}
+
+{% block content %}
+<div class="container">
+    {% if not session.admin_logged_in %}
+    <div class="admin-login">
+        <div class="login-box">
+            <img src="{{ url_for('static', filename='images/logo-admin.png') }}" alt="Admin" class="admin-logo">
+            <h2>Painel de Administração</h2>
+            
+            <form id="adminLoginForm">
                 <div class="form-group">
-                    <label for="username">Usuário:</label>
-                    <input type="text" id="username" name="username" required>
+                    <label for="username"><i class="fas fa-user"></i> Usuário</label>
+                    <input type="text" id="username" required>
                 </div>
+                
                 <div class="form-group">
-                    <label for="password">Senha:</label>
-                    <input type="password" id="password" name="password" required>
+                    <label for="password"><i class="fas fa-lock"></i> Senha</label>
+                    <input type="password" id="password" required>
                 </div>
-                <button type="submit">Entrar</button>
+                
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-sign-in-alt"></i> Entrar
+                </button>
             </form>
-        {% else %}
-            <h1>Painel de Administração</h1>
-            <div class="admin-controls">
-                <div class="game-status">
-                    <h2>Status do Jogo</h2>
-                    <p>Números sorteados: {{ numbers_drawn|length }}/75</p>
-                    <p>Estado: {% if game_started %}Em andamento{% else %}Não iniciado{% endif %}</p>
-                </div>
-                
-                <div class="actions">
-                    <button id="drawNumber">Sortear Número</button>
-                    <button id="resetGame">Reiniciar Jogo</button>
-                    <a href="{{ url_for('logout') }}" class="logout-btn">Sair</a>
-                </div>
-                
-                <div class="numbers-drawn">
-                    <h2>Números Sorteados</h2>
-                    <div class="drawn-numbers-list">
-                        {% for num in numbers_drawn %}
-                            <span class="drawn-number">{{ num }}</span>
-                        {% endfor %}
-                    </div>
-                </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="admin-panel">
+        <div class="admin-header">
+            <h1><i class="fas fa-crown"></i> Painel de Controle</h1>
+            <a href="/admin/logout" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Sair</a>
+        </div>
+        
+        <div class="game-info">
+            <div class="info-card">
+                <h3>Status do Jogo</h3>
+                <p id="gameStatus">Não iniciado</p>
             </div>
             
-            <script>
-                document.getElementById('drawNumber').addEventListener('click', async () => {
-                    const response = await fetch('/draw_number', {
-                        method: 'POST'
-                    });
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        alert(`Número sorteado: ${data.number}`);
-                        location.reload();
-                    } else {
-                        const error = await response.json();
-                        alert(error.error);
-                    }
-                });
+            <div class="info-card">
+                <h3>Cartelas Registradas</h3>
+                <p id="cardsCount">0</p>
+            </div>
+            
+            <div class="info-card">
+                <h3>Números Sorteados</h3>
+                <p id="numbersDrawn">0</p>
+            </div>
+        </div>
+        
+        <div class="control-panel">
+            <button id="startGameBtn" class="control-btn">
+                <i class="fas fa-play"></i> Iniciar
+            </button>
+            
+            <button id="stopGameBtn" class="control-btn" disabled>
+                <i class="fas fa-pause"></i> Pausar
+            </button>
+            
+            <button id="resetGameBtn" class="control-btn">
+                <i class="fas fa-redo"></i> Reiniciar
+            </button>
+        </div>
+        
+        <div class="card-form">
+            <h3><i class="fas fa-plus-circle"></i> Adicionar Cartela</h3>
+            
+            <form id="addCardForm">
+                <div class="form-group">
+                    <label for="playerName">Nome do Jogador</label>
+                    <input type="text" id="playerName" class="form-control" required>
+                </div>
                 
-                document.getElementById('resetGame').addEventListener('click', async () => {
-                    if (confirm('Tem certeza que deseja reiniciar o jogo? Todos os números sorteados serão apagados.')) {
-                        const response = await fetch('/reset_game', {
-                            method: 'POST'
-                        });
-                        
-                        if (response.ok) {
-                            alert('Jogo reiniciado com sucesso!');
-                            location.reload();
-                        }
-                    }
-                });
-            </script>
-        {% endif %}
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-plus"></i> Gerar Cartela
+                </button>
+            </form>
+            
+            <div id="generatedCards" class="generated-cards-container"></div>
+        </div>
+        
+        <div class="winners-panel">
+            <h3><i class="fas fa-trophy"></i> Ganhadores</h3>
+            <div id="winnersList" class="winners-list"></div>
+        </div>
     </div>
-</body>
-</html>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if session.admin_logged_in %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% else %}
+<script src="{{ url_for('static', filename='js/login.js') }}"></script>
+{% endif %}
+{% endblock %}

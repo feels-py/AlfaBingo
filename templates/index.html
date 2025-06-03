@@ -1,67 +1,64 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bingo Online</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <div class="container">
-        <h1>Bingo Online</h1>
-        
-        <div class="game-area">
-            <div class="current-number" id="currentNumber">
-                {% if game_started and numbers_drawn %}
-                    {{ numbers_drawn[-1] }}
-                {% else %}
-                    --
-                {% endif %}
+{% extends "base.html" %}
+
+{% block title %}Bingo Online Premium{% endblock %}
+
+{% block extra_css %}
+<style>
+    .music-control {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: var(--primary);
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 100;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <header>
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Bingo Premium" class="logo">
+        <h1>Bingo Online Premium</h1>
+        <div class="game-stats">
+            <p>Números sorteados: <span id="totalDrawn">0</span>/75</p>
+        </div>
+    </header>
+    
+    <main>
+        <div class="game-board">
+            <div class="current-number-container">
+                <h2>Número Atual</h2>
+                <div class="current-number" id="currentNumber">--</div>
+                <p>Último sorteado</p>
             </div>
             
-            <div class="numbers-drawn">
-                <h2>Números Sorteados:</h2>
-                <div class="drawn-numbers-list">
-                    {% for num in numbers_drawn %}
-                        <span class="drawn-number">{{ num }}</span>
-                    {% endfor %}
-                </div>
+            <div class="drawn-numbers">
+                <h2>Números Sorteados</h2>
+                <div class="drawn-numbers-list" id="drawnNumbers"></div>
             </div>
         </div>
         
-        <div class="stats">
-            <p>Total de números sorteados: <span id="totalDrawn">{{ numbers_drawn|length }}</span>/75</p>
+        <div class="winners-section">
+            <h2>Ganhadores</h2>
+            <div id="winnersContainer"></div>
         </div>
-    </div>
+    </main>
+</div>
 
-    <script>
-        // Atualiza os números em tempo real
-        function updateNumbers() {
-            fetch('/get_numbers')
-                .then(response => response.json())
-                .then(data => {
-                    const currentNumber = document.getElementById('currentNumber');
-                    const totalDrawn = document.getElementById('totalDrawn');
-                    const numbersList = document.querySelector('.drawn-numbers-list');
-                    
-                    if (data.numbers_drawn.length > 0) {
-                        currentNumber.textContent = data.numbers_drawn[data.numbers_drawn.length - 1];
-                    } else {
-                        currentNumber.textContent = '--';
-                    }
-                    
-                    totalDrawn.textContent = data.numbers_drawn.length;
-                    
-                    // Atualiza a lista de números sorteados
-                    numbersList.innerHTML = data.numbers_drawn.map(num => 
-                        `<span class="drawn-number">${num}</span>`
-                    ).join('');
-                });
-        }
-        
-        // Atualiza a cada 3 segundos
-        setInterval(updateNumbers, 3000);
-        updateNumbers(); // Chama imediatamente ao carregar
-    </script>
-</body>
-</html>
+<div class="music-control" id="musicToggle" data-tooltip="Controle de música">
+    <i class="fas fa-volume-up"></i>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% endblock %}

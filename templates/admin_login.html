@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Login Admin - Alfa Bingo{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-box">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Alfa Bingo" class="login-logo">
+        <h2><i class="fas fa-lock"></i> Acesso Administrativo</h2>
+        
+        <form id="adminLoginForm" class="login-form">
+            <div class="form-group">
+                <label for="username">Usuário:</label>
+                <input type="text" id="username" name="username" required class="form-input">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Senha:</label>
+                <input type="password" id="password" name="password" required class="form-input">
+            </div>
+            
+            <button type="submit" class="login-btn">
+                <i class="fas fa-sign-in-alt"></i> Entrar
+            </button>
+        </form>
+    </div>
+</div>
+
+<style>
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh;
+    }
+    
+    .login-box {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 30px;
+        border-radius: 15px;
+        width: 100%;
+        max-width: 400px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        text-align: center;
+    }
+    
+    .login-logo {
+        height: 80px;
+        margin-bottom: 20px;
+    }
+    
+    .login-form {
+        margin-top: 20px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+        text-align: left;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 5px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+    }
+    
+    .login-btn {
+        width: 100%;
+        padding: 12px;
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        margin-top: 10px;
+    }
+    
+    .login-btn:hover {
+        background: var(--secondary);
+    }
+</style>
+
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

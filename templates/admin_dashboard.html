@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block title %}Painel Admin - Alfa Bingo{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <div class="admin-header">
+        <h1><i class="fas fa-crown"></i> Painel de Controle - Alfa Bingo</h1>
+        <a href="/admin/logout" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Sair</a>
+    </div>
+
+    <div class="game-controls">
+        <div class="control-card">
+            <h2><i class="fas fa-gamepad"></i> Controles do Jogo</h2>
+            
+            <div class="control-buttons">
+                <button id="startGameBtn" class="btn-control">
+                    <i class="fas fa-play"></i> Iniciar Sorteio
+                </button>
+                <button id="stopGameBtn" class="btn-control" disabled>
+                    <i class="fas fa-pause"></i> Pausar Sorteio
+                </button>
+                <button id="resetGameBtn" class="btn-control btn-danger">
+                    <i class="fas fa-redo"></i> Reiniciar Jogo
+                </button>
+            </div>
+        </div>
+
+        <div class="stats-card">
+            <h2><i class="fas fa-chart-bar"></i> Estatísticas</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-label">Status do Jogo:</span>
+                    <span class="stat-value" id="gameStatus">
+                        {{ 'Em andamento' if game_state.is_running else 'Parado' }}
+                    </span>
+                </div>
+                
+                <div class="stat-item">
+                    <span class="stat-label">Números Sorteados:</span>
+                    <span class="stat-value" id="numbersDrawn">
+                        {{ game_state.numbers_drawn|length }}
+                    </span>
+                </div>
+                
+                <div class="stat-item">
+                    <span class="stat-label">Cartelas Registradas:</span>
+                    <span class="stat-value">
+                        {{ game_state.cards|length }}
+                    </span>
+                </div>
+                
+                <div class="stat-item">
+                    <span class="stat-label">Ganhadores:</span>
+                    <span class="stat-value">
+                        {{ game_state.winners|length }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-sections">
+        <div class="add-card-section">
+            <h2><i class="fas fa-plus-circle"></i> Adicionar Cartela</h2>
+            
+            <form id="addCardForm" class="card-form">
+                <div class="form-group">
+                    <label for="playerName">Nome do Jogador:</label>
+                    <input type="text" id="playerName" class="form-input" required>
+                </div>
+                
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-plus"></i> Gerar Nova Cartela
+                </button>
+            </form>
+        </div>
+
+        <div class="winners-section">
+            <h2><i class="fas fa-trophy"></i> Últimos Ganhadores</h2>
+            
+            <div id="winnersList" class="winners-list">
+                {% for winner in game_state.winners %}
+                <div class="winner-card">
+                    <h3>{{ winner.name }}</h3>
+                    <p>Cartela: {{ winner.id }}</p>
+                    <p class="win-time">{{ winner.timestamp|datetime }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .admin-dashboard {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .admin-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid var(--accent);
+    }
+    
+    .btn-logout {
+        background: var(--danger);
+        color: white;
+        padding: 10px 15px;
+        border-radius: 5px;
+        text-decoration: none;
+    }
+    
+    .game-controls {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .control-card, .stats-card {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        border-radius: 10px;
+        backdrop-filter: blur(10px);
+    }
+    
+    .control-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    
+    .btn-control {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+    
+    .btn-control:not(.btn-danger) {
+        background: var(--accent);
+        color: white;
+    }
+    
+    .btn-danger {
+        background: var(--danger);
+        color: white;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-top: 15px;
+    }
+    
+    .stat-item {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    .stat-label {
+        display: block;
+        font-size: 0.9em;
+        color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .stat-value {
+        font-weight: bold;
+        font-size: 1.2em;
+    }
+    
+    .admin-sections {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    
+    .card-form {
+        margin-top: 15px;
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 5px;
+        color: white;
+    }
+    
+    .btn-submit {
+        background: var(--success);
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    
+    .winners-list {
+        margin-top: 15px;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .winner-card {
+        background: rgba(46, 204, 113, 0.1);
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        border-left: 4px solid var(--success);
+    }
+    
+    .win-time {
+        font-size: 0.8em;
+        color: rgba(255, 255, 255, 0.6);
+        margin-top: 5px;
+    }
+</style>
+
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}
