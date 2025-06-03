@@ -6,6 +6,7 @@ import secrets
 import random
 import time
 import threading
+from functools import wraps  # Importação adicionada para corrigir o erro
 from datetime import datetime
 
 # Configuração do Flask
@@ -35,7 +36,7 @@ class GameState:
 
 game_state = GameState()
 
-# Decorator para rotas admin
+# Decorator para rotas admin (CORRIGIDO)
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -100,13 +101,19 @@ def admin_login():
 @app.route('/admin/auth', methods=['POST'])
 def admin_auth():
     data = request.get_json()
+    if not data:
+        return jsonify({'error': 'Dados inválidos'}), 400
+        
     username = data.get('username')
     password = data.get('password')
     
     if (username == ADMIN_USERNAME and 
         check_password_hash(ADMIN_PASSWORD_HASH, password)):
         session['admin_logged_in'] = True
-        return jsonify({'success': True, 'redirect': url_for('admin_dashboard')})
+        return jsonify({
+            'success': True, 
+            'redirect': url_for('admin_dashboard')
+        })
     
     return jsonify({'error': 'Credenciais inválidas'}), 401
 
@@ -154,6 +161,9 @@ def reset_game():
 @admin_required
 def add_card():
     data = request.get_json()
+    if not data:
+        return jsonify({'error': 'Dados inválidos'}), 400
+        
     card_id = f"ALFA-{secrets.token_hex(3).upper()}"
     numbers = sorted(random.sample(range(1, 76), 24))
     
