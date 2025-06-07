@@ -1,135 +1,142 @@
 document.addEventListener('DOMContentLoaded', () => {
     const socket = io();
-    
-    // Elementos da UI
     const currentNumberEl = document.getElementById('currentNumber');
-    const drawnNumbersEl = document.getElementById('drawnNumbers');
-    const winnersContainer = document.getElementById('winnersContainer');
+    const drawnNumbersGrid = document.getElementById('drawnNumbersGrid');
     const totalDrawnEl = document.getElementById('totalDrawn');
+    const winnersList = document.getElementById('winnersList');
+    const statusIndicator = document.getElementById('statusIndicator');
+    const statusText = document.getElementById('statusText');
+    const winnersContainer = document.getElementById('winnersContainer');
     
-    // Efeitos de áudio
-    const drawSound = new Audio('/static/sounds/draw.mp3');
-    const winSound = new Audio('/static/sounds/win.mp3');
-    const backgroundMusic = new Audio('/static/sounds/background.mp3');
-    
-    // Configura música de fundo
-    backgroundMusic.loop = true;
-    backgroundMusic.volume = 0.3;
-    
-    // Eventos do Socket.IO
-    socket.on('connect', () => {
-        console.log('Conectado ao servidor de bingo');
-    });
-    
-    socket.on('number_drawn', (data) => {
-        animateNumber(data.number);
-        updateDrawnNumbers(data.numbers);
-        totalDrawnEl.textContent = data.total;
-        playDrawSound();
-    });
-    
-    socket.on('new_winner', (winner) => {
-        displayWinner(winner);
-        playWinSound();
-        createConfettiEffect();
-    });
-    
-    socket.on('game_update', (data) => {
-        updateDrawnNumbers(data.numbers);
-        totalDrawnEl.textContent = data.numbers.length;
-        
-        if (data.winners && data.winners.length > 0) {
-            winnersContainer.innerHTML = '';
-            data.winners.forEach(winner => {
-                displayWinner(winner);
-            });
+    // Cria os espaços para os números de 1 a 75
+    function initializeNumberGrid() {
+        drawnNumbersGrid.innerHTML = '';
+        for (let i = 1; i <= 75; i++) {
+            const numberEl = document.createElement('div');
+            numberEl.className = 'drawn-number';
+            numberEl.textContent = i;
+            numberEl.id = `number-${i}`;
+            drawnNumbersGrid.appendChild(numberEl);
         }
-    });
+    }
     
-    socket.on('game_reset', () => {
-        currentNumberEl.textContent = '--';
-        drawnNumbersEl.innerHTML = '';
-        winnersContainer.innerHTML = '';
-        totalDrawnEl.textContent = '0';
-    });
+    // Atualiza o status do jogo
+    function updateGameStatus(isRunning) {
+        if (isRunning) {
+            statusIndicator.style.color = '#2ecc71';
+            statusText.textContent = 'Sorteio em andamento';
+        } else {
+            statusIndicator.style.color = '#e74c3c';
+            statusText.textContent = 'Sorteio pausado';
+        }
+    }
     
-    // Funções de animação
-    function animateNumber(number) {
+    // Mostra um número sorteado
+    function showDrawnNumber(number) {
+        // Atualiza o número atual com animação
         currentNumberEl.textContent = number;
-        currentNumberEl.classList.add('animate');
+        currentNumberEl.style.animation = 'none';
+        void currentNumberEl.offsetWidth; // Trigger reflow
+        currentNumberEl.style.animation = 'pulse 0.5s ease-in-out';
         
+        // Destaca o número na grade
+        const numberEl = document.getElementById(`number-${number}`);
+        numberEl.classList.add('drawn', 'recent');
+        
+        // Remove o destaque após 3 segundos
         setTimeout(() => {
-            currentNumberEl.classList.remove('animate');
-        }, 1000);
+            numberEl.classList.remove('recent');
+        }, 3000);
     }
     
-    function updateDrawnNumbers(numbers) {
-        drawnNumbersEl.innerHTML = numbers.map(num => 
-            `<span class="drawn-number">${num}</span>`
-        ).join('');
-    }
-    
-    function displayWinner(winner) {
-        const winnerCard = document.createElement('div');
-        winnerCard.className = 'winner-card highlight';
-        winnerCard.innerHTML = `
+    // Mostra um vencedor
+    function showWinner(winner) {
+        const winnerEl = document.createElement('div');
+        winnerEl.className = 'winner-card';
+        winnerEl.innerHTML = `
             <h3>${winner.name}</h3>
             <p>Cartela: ${winner.id}</p>
             <p class="win-time">${winner.timestamp}</p>
         `;
+        winnersList.prepend(winnerEl);
         
-        winnersContainer.prepend(winnerCard);
+        // Mostra o container de vencedores se estiver oculto
+        winnersContainer.style.display = 'block';
         
-        setTimeout(() => {
-            winnerCard.classList.remove('highlight');
-        }, 2000);
+        // Animação de confete
+        createConfettiEffect();
     }
     
-    function playDrawSound() {
-        drawSound.currentTime = 0;
-        drawSound.play().catch(e => console.log("Autoplay prevented:", e));
-    }
-    
-    function playWinSound() {
-        winSound.currentTime = 0;
-        winSound.play().catch(e => console.log("Autoplay prevented:", e));
-    }
-    
+    // Efeito de confete
     function createConfettiEffect() {
-        const colors = ['#ff6f00', '#e91e63', '#4caf50', '#2196f3', '#ffeb3b'];
-        
-        for (let i = 0; i < 100; i++) {
-            const confetti = document.createElement('div');
-            confetti.className = 'confetti';
-            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-            confetti.style.left = `${Math.random() * 100}vw`;
-            confetti.style.animationDelay = `${Math.random() * 2}s`;
-            document.body.appendChild(confetti);
-            
-            setTimeout(() => {
-                confetti.remove();
-            }, 5000);
-        }
-    }
-    
-    // Controles de música
-    const musicToggle = document.getElementById('musicToggle');
-    if (musicToggle) {
-        musicToggle.addEventListener('click', () => {
-            if (backgroundMusic.paused) {
-                backgroundMusic.play();
-                musicToggle.innerHTML = '<i class="fas fa-volume-up"></i>';
-            } else {
-                backgroundMusic.pause();
-                musicToggle.innerHTML = '<i class="fas fa-volume-mute"></i>';
-            }
+        confetti({
+            particleCount: 150,
+            spread: 70,
+            origin: { y: 0.6 }
         });
     }
     
-    // Inicia música de fundo após interação do usuário
-    document.body.addEventListener('click', () => {
-        if (backgroundMusic.paused) {
-            backgroundMusic.play().catch(e => console.log("Autoplay prevented:", e));
+    // Inicializa a grade de números
+    initializeNumberGrid();
+    
+    // Eventos do Socket.IO
+    socket.on('connect', () => {
+        console.log('Conectado ao servidor de sorteio');
+    });
+    
+    socket.on('number_drawn', (data) => {
+        showDrawnNumber(data.number);
+        totalDrawnEl.textContent = data.total;
+    });
+    
+    socket.on('new_winner', (winner) => {
+        showWinner(winner);
+        playWinSound();
+    });
+    
+    socket.on('game_paused', (data) => {
+        updateGameStatus(false);
+        if (data.reason === 'winner_found') {
+            const msg = 'Sorteio pausado automaticamente porque temos um ganhador!';
+            console.log(msg);
+            alert(msg);
         }
-    }, { once: true });
+    });
+    
+    socket.on('game_update', (data) => {
+        // Atualiza todos os números sorteados
+        data.numbers.forEach(num => {
+            const numberEl = document.getElementById(`number-${num}`);
+            if (numberEl) numberEl.classList.add('drawn');
+        });
+        
+        totalDrawnEl.textContent = data.numbers.length;
+        updateGameStatus(data.is_running);
+        
+        // Atualiza lista de ganhadores
+        if (data.winners && data.winners.length > 0) {
+            winnersList.innerHTML = '';
+            data.winners.forEach(winner => {
+                showWinner(winner);
+            });
+        } else {
+            winnersContainer.style.display = 'none';
+        }
+    });
+    
+    socket.on('game_reset', () => {
+        // Reseta a interface
+        currentNumberEl.textContent = '--';
+        initializeNumberGrid();
+        totalDrawnEl.textContent = '0';
+        winnersList.innerHTML = '';
+        winnersContainer.style.display = 'none';
+        updateGameStatus(false);
+    });
+    
+    // Efeitos de áudio
+    function playWinSound() {
+        const winSound = new Audio('/static/sounds/win.mp3');
+        winSound.play().catch(e => console.log("Autoplay prevented:", e));
+    }
 });

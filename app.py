@@ -64,6 +64,7 @@ def auto_draw():
             time.sleep(game_state.draw_speed)
 
 def check_winners(number):
+    winners_found = False
     for card_id, card in game_state.cards.items():
         if number in card['numbers'] and number not in card.get('marked', []):
             card['marked'] = card.get('marked', []) + [number]
@@ -78,6 +79,12 @@ def check_winners(number):
                     }
                     game_state.winners.append(winner)
                     socketio.emit('new_winner', winner)
+                    winners_found = True
+    
+    # Pausa o jogo automaticamente se houver vencedores
+    if winners_found and game_state.auto_draw:
+        game_state.auto_draw = False
+        socketio.emit('game_paused', {'reason': 'winner_found'})
 
 @app.route('/')
 def home():

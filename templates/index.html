@@ -1,64 +1,150 @@
 {% extends "base.html" %}
 
-{% block title %}Bingo Online Premium{% endblock %}
+{% block title %}Bingo Online - Sorteio{% endblock %}
 
 {% block extra_css %}
 <style>
-    .music-control {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        background: var(--primary);
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
+    .game-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 30px;
+        padding: 20px;
+    }
+    
+    .current-number-container {
+        text-align: center;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 30px;
+        border-radius: 15px;
+        width: 80%;
+        max-width: 500px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+    
+    .current-number {
+        font-size: 8rem;
+        font-weight: bold;
+        margin: 20px 0;
+        color: #FFD700;
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+        animation: pulse 1s infinite alternate;
+    }
+    
+    .drawn-numbers-container {
+        background: rgba(0, 0, 0, 0.7);
+        padding: 20px;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 800px;
+    }
+    
+    .drawn-numbers-grid {
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);
+        gap: 10px;
+        margin-top: 20px;
+    }
+    
+    .drawn-number {
+        background: #3498db;
+        color: white;
+        width: 100%;
+        aspect-ratio: 1;
         display: flex;
         align-items: center;
         justify-content: center;
-        cursor: pointer;
+        border-radius: 50%;
+        font-weight: bold;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+    }
+    
+    .drawn-number.recent {
+        background: #FFD700;
+        color: #000;
+        transform: scale(1.1);
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+    }
+    
+    .drawn-number.drawn {
+        background: #e74c3c;
+    }
+    
+    .winners-container {
+        background: rgba(0, 0, 0, 0.7);
+        padding: 20px;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 800px;
+        margin-top: 20px;
+    }
+    
+    .winner-card {
+        background: rgba(46, 204, 113, 0.2);
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 8px;
+        border-left: 4px solid #2ecc71;
+    }
+    
+    .game-status {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 10px 20px;
+        border-radius: 20px;
+        color: white;
         z-index: 100;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+    
+    .stats {
+        margin-top: 15px;
+        font-size: 1.2rem;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        100% { transform: scale(1.05); }
+    }
+    
+    @keyframes highlight {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <header>
-        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Bingo Premium" class="logo">
-        <h1>Bingo Online Premium</h1>
-        <div class="game-stats">
-            <p>Números sorteados: <span id="totalDrawn">0</span>/75</p>
-        </div>
-    </header>
+<div class="game-container">
+    <div class="game-status" id="gameStatus">
+        <i class="fas fa-circle" id="statusIndicator"></i>
+        <span id="statusText">Aguardando início</span>
+    </div>
     
-    <main>
-        <div class="game-board">
-            <div class="current-number-container">
-                <h2>Número Atual</h2>
-                <div class="current-number" id="currentNumber">--</div>
-                <p>Último sorteado</p>
-            </div>
-            
-            <div class="drawn-numbers">
-                <h2>Números Sorteados</h2>
-                <div class="drawn-numbers-list" id="drawnNumbers"></div>
-            </div>
+    <div class="current-number-container">
+        <h2>Último Número Sorteado</h2>
+        <div class="current-number" id="currentNumber">--</div>
+        <div class="stats">
+            <p>Total sorteados: <span id="totalDrawn">0</span>/75</p>
         </div>
-        
-        <div class="winners-section">
-            <h2>Ganhadores</h2>
-            <div id="winnersContainer"></div>
+    </div>
+    
+    <div class="drawn-numbers-container">
+        <h2>Números Sorteados</h2>
+        <div class="drawn-numbers-grid" id="drawnNumbersGrid">
+            <!-- Números serão inseridos aqui via JavaScript -->
         </div>
-    </main>
+    </div>
+    
+    <div class="winners-container" id="winnersContainer">
+        <h2>Ganhadores</h2>
+        <div id="winnersList"></div>
+    </div>
 </div>
 
-<div class="music-control" id="musicToggle" data-tooltip="Controle de música">
-    <i class="fas fa-volume-up"></i>
-</div>
-
-{% endblock %}
-
-{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 {% endblock %}
