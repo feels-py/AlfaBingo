@@ -16,7 +16,7 @@ body {
     background-size: cover;
     color: var(--light);
     margin: 50px;
-    padding: 0;
+    padding: 10px;
     min-height: 100vh;
 }
 
