@@ -11,11 +11,11 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(rgba(20, 62, 80, 0.9), rgba(20, 62, 80, 0.9)), 
+    background: linear-gradient(rgba(20, 62, 80, 0.1), rgba(20, 62, 80, 0.1)), 
                 url('/static/images/bg.jpg') no-repeat center center fixed;
     background-size: cover;
     color: var(--light);
-    margin: 0;
+    margin: 10px;
     padding: 0;
     min-height: 300vh;
 }
@@ -32,7 +32,7 @@ body {
 }
 
 .logo {
-    height: 160px;
+    height: 80px;
     margin-bottom: 15px;
 }
 
