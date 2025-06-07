@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Conecta ao Socket.IO
-    const socket = io('/public');
+    const socket = io();
     
     // Elementos da UI
     const currentNumberEl = document.getElementById('currentNumber');
@@ -23,16 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     socket.on('number_drawn', (data) => {
-        // Atualiza número atual com animação
         animateNumber(data.number);
-        
-        // Atualiza lista de números sorteados
         updateDrawnNumbers(data.numbers);
-        
-        // Atualiza contador
         totalDrawnEl.textContent = data.total;
-        
-        // Toca efeito sonoro
         playDrawSound();
     });
     
@@ -83,14 +75,11 @@ document.addEventListener('DOMContentLoaded', () => {
         winnerCard.innerHTML = `
             <h3>${winner.name}</h3>
             <p>Cartela: ${winner.id}</p>
-            <div class="winner-numbers">
-                ${winner.numbers.map(num => `<span>${num}</span>`).join('')}
-            </div>
+            <p class="win-time">${winner.timestamp}</p>
         `;
         
         winnersContainer.prepend(winnerCard);
         
-        // Remove a classe de destaque após a animação
         setTimeout(() => {
             winnerCard.classList.remove('highlight');
         }, 2000);

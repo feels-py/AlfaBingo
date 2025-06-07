@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.success) {
                 startBtn.disabled = true;
                 stopBtn.disabled = false;
+                document.getElementById('gameStatus').textContent = 'Em andamento';
             }
         });
     }
@@ -54,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.success) {
                 startBtn.disabled = false;
                 stopBtn.disabled = true;
+                document.getElementById('gameStatus').textContent = 'Pausado';
             }
         });
     }
@@ -65,6 +67,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (response.ok) {
                     startBtn.disabled = false;
                     stopBtn.disabled = true;
+                    document.getElementById('gameStatus').textContent = 'Parado';
+                    document.getElementById('numbersDrawn').textContent = '0';
+                    document.getElementById('winnersList').innerHTML = '';
                 }
             }
         });
@@ -73,17 +78,25 @@ document.addEventListener('DOMContentLoaded', () => {
     if (addCardForm) {
         addCardForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const response = await fetch('/api/admin/cards/add', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    name: document.getElementById('playerName').value
-                })
-            });
-            const data = await response.json();
-            if (data.success) {
-                alert(`Cartela ${data.card_id} adicionada!`);
-                addCardForm.reset();
+            const playerName = document.getElementById('playerName').value;
+            
+            try {
+                const response = await fetch('/api/admin/cards/add', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ name: playerName })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(`Cartela ${data.card_id} adicionada para ${playerName}!`);
+                    addCardForm.reset();
+                } else {
+                    alert('Erro ao adicionar cartela: ' + (data.error || 'Erro desconhecido'));
+                }
+            } catch (error) {
+                alert('Erro ao conectar com o servidor');
             }
         });
     }
@@ -105,6 +118,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 <small>${winner.timestamp}</small>
             `;
             winnersList.prepend(winnerEl);
+        }
+    });
+
+    socket.on('game_reset', () => {
+        if (document.getElementById('numbersDrawn')) {
+            document.getElementById('numbersDrawn').textContent = '0';
+        }
+        if (document.getElementById('winnersList')) {
+            document.getElementById('winnersList').innerHTML = '';
         }
     });
 });

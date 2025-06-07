@@ -18,6 +18,17 @@
     animation: fadeIn 0.3s ease-out;
 }
 
-.winner-card {
+.winner-card.highlight {
     animation: pulse 0.5s 3;
+}
+
+/* Animação para números sorteados */
+@keyframes bounceIn {
+    0% { transform: scale(0.1); opacity: 0; }
+    60% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); }
+}
+
+.animate {
+    animation: bounceIn 0.6s;
 }
