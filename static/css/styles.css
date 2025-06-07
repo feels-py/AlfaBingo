@@ -11,7 +11,7 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(rgba(20, 62, 80, 0.1), rgba(20, 62, 80, 0.1)), 
+    background: linear-gradient(rgba(20, 62, 80, 0.9), rgba(20, 62, 80, 0.9)), 
                 url('/static/images/bg.jpg') no-repeat center center fixed;
     background-size: cover;
     color: var(--light);
