@@ -41,6 +41,9 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def generate_card_numbers():
+    return sorted(random.sample(range(1, 76), 24))
+
 def auto_draw():
     with app.app_context():
         while game_state.is_running and game_state.auto_draw:
@@ -62,14 +65,16 @@ def auto_draw():
 
 def check_winners(number):
     for card_id, card in game_state.cards.items():
-        if number in card['numbers']:
+        if number in card['numbers'] and number not in card.get('marked', []):
             card['marked'] = card.get('marked', []) + [number]
-            if len(card['marked']) == 24:  # Bingo!
+            if len(card['marked']) >= 24:  # Bingo!
                 if card_id not in [w['id'] for w in game_state.winners]:
                     winner = {
                         'id': card_id,
                         'name': card['name'],
-                        'timestamp': datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+                        'timestamp': datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+                        'numbers': card['numbers'],
+                        'marked_numbers': card['marked']
                     }
                     game_state.winners.append(winner)
                     socketio.emit('new_winner', winner)
@@ -151,22 +156,36 @@ def reset():
 def add_card():
     try:
         data = request.get_json()
+        if not data or 'name' not in data:
+            return jsonify({'error': 'Dados inválidos ou nome não fornecido'}), 400
+
         card_id = f"ALFA-{secrets.token_hex(3).upper()}"
-        numbers = sorted(random.sample(range(1, 76), 24))
+        numbers = generate_card_numbers()
         
         game_state.cards[card_id] = {
-            'name': data.get('name', 'Jogador'),
+            'name': data['name'].strip(),
             'numbers': numbers,
-            'marked': []
+            'marked': [],
+            'created_at': datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         }
         
         return jsonify({
             'success': True,
             'card_id': card_id,
-            'numbers': numbers
+            'numbers': numbers,
+            'name': data['name'].strip()
         })
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': f'Erro ao criar cartela: {str(e)}'}), 500
+
+@app.route('/api/admin/cards/list', methods=['GET'])
+@admin_required
+def list_cards():
+    return jsonify({
+        'success': True,
+        'cards': game_state.cards,
+        'total': len(game_state.cards)
+    })
 
 @socketio.on('connect')
 def connect():

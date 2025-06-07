@@ -75,12 +75,60 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Função para carregar e exibir cartelas
+    async function loadCards() {
+        try {
+            const response = await fetch('/api/admin/cards/list');
+            const data = await response.json();
+            
+            if (data.success) {
+                const cardsList = document.getElementById('cardsList');
+                cardsList.innerHTML = '';
+                
+                Object.entries(data.cards).forEach(([cardId, card]) => {
+                    const cardEl = document.createElement('div');
+                    cardEl.className = 'card-item';
+                    cardEl.innerHTML = `
+                        <h3>${card.name} <small>(${cardId})</small></h3>
+                        <p>Criada em: ${card.created_at}</p>
+                        <div class="card-numbers">
+                            ${card.numbers.map(num => `<span class="card-number">${num}</span>`).join('')}
+                        </div>
+                        <div class="card-actions">
+                            <button class="copy-btn" data-numbers="${card.numbers.join(',')}">
+                                <i class="fas fa-copy"></i> Copiar Números
+                            </button>
+                        </div>
+                    `;
+                    cardsList.appendChild(cardEl);
+                });
+                
+                // Adiciona eventos de cópia
+                document.querySelectorAll('.copy-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const numbers = btn.getAttribute('data-numbers');
+                        navigator.clipboard.writeText(numbers)
+                            .then(() => alert('Números copiados para a área de transferência!'))
+                            .catch(() => alert('Falha ao copiar. Permita acesso à área de transferência.'));
+                    });
+                });
+            }
+        } catch (error) {
+            console.error('Erro ao carregar cartelas:', error);
+        }
+    }
+
+    // Adicionar nova cartela
     if (addCardForm) {
         addCardForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const playerName = document.getElementById('playerName').value;
+            const submitBtn = addCardForm.querySelector('button[type="submit"]');
             
             try {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...';
+                
                 const response = await fetch('/api/admin/cards/add', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -90,16 +138,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
                 
                 if (data.success) {
-                    alert(`Cartela ${data.card_id} adicionada para ${playerName}!`);
+                    alert(`Cartela ${data.card_id} gerada com sucesso para ${data.name}!`);
                     addCardForm.reset();
+                    loadCards(); // Atualiza a lista de cartelas
                 } else {
-                    alert('Erro ao adicionar cartela: ' + (data.error || 'Erro desconhecido'));
+                    alert('Erro ao gerar cartela: ' + (data.error || 'Erro desconhecido'));
                 }
             } catch (error) {
                 alert('Erro ao conectar com o servidor');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-plus"></i> Gerar Nova Cartela';
             }
         });
     }
+
+    // Botão para atualizar lista de cartelas
+    document.getElementById('refreshCardsBtn')?.addEventListener('click', loadCards);
 
     // Atualizações em tempo real
     socket.on('number_drawn', (data) => {
@@ -129,4 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('winnersList').innerHTML = '';
         }
     });
+
+    // Carrega as cartelas ao iniciar
+    loadCards();
 });

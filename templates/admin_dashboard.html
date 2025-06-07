@@ -46,7 +46,7 @@
                 
                 <div class="stat-item">
                     <span class="stat-label">Cartelas Registradas:</span>
-                    <span class="stat-value">
+                    <span class="stat-value" id="cardsCount">
                         {{ game_state.cards|length }}
                     </span>
                 </div>
@@ -79,7 +79,6 @@
 
         <div class="winners-section">
             <h2><i class="fas fa-trophy"></i> Últimos Ganhadores</h2>
-            
             <div id="winnersList" class="winners-list">
                 {% for winner in game_state.winners %}
                 <div class="winner-card">
@@ -89,6 +88,18 @@
                 </div>
                 {% endfor %}
             </div>
+        </div>
+    </div>
+
+    <div class="cards-section">
+        <h2><i class="fas fa-list"></i> Cartelas Geradas</h2>
+        <div class="cards-controls">
+            <button id="refreshCardsBtn" class="btn-control">
+                <i class="fas fa-sync-alt"></i> Atualizar Lista
+            </button>
+        </div>
+        <div id="cardsList" class="cards-list">
+            <!-- Cartelas serão carregadas aqui via JavaScript -->
         </div>
     </div>
 </div>
@@ -208,7 +219,7 @@
         cursor: pointer;
     }
     
-    .winners-list {
+    .winners-list, .cards-list {
         margin-top: 15px;
         max-height: 400px;
         overflow-y: auto;
@@ -226,6 +237,50 @@
         font-size: 0.8em;
         color: rgba(255, 255, 255, 0.6);
         margin-top: 5px;
+    }
+    
+    .cards-section {
+        margin-top: 30px;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        border-radius: 10px;
+    }
+    
+    .card-item {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        border-left: 4px solid var(--accent);
+    }
+    
+    .card-numbers {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin: 10px 0;
+    }
+    
+    .card-number {
+        background: var(--accent);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 3px;
+        font-size: 0.9em;
+    }
+    
+    .card-actions {
+        margin-top: 10px;
+    }
+    
+    .copy-btn {
+        background: var(--success);
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 0.8em;
     }
 </style>
 
