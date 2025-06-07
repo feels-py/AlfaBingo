@@ -9,105 +9,112 @@
     --danger: #e74c3c;
 }
 
+/* Estilos base para mobile-first */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(rgba(20, 62, 80, 0.9), rgba(20, 62, 80, 0.9)), 
-                url('/static/images/bg.jpg') no-repeat center center fixed;
+    background: url('/static/images/bg.jpg') no-repeat center center fixed;
     background-size: cover;
     color: var(--light);
     margin: 0;
     padding: 0;
     min-height: 100vh;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .container {
-    max-width: 1200px;
+    width: 100%;
     margin: 0 auto;
-    padding: 30px;
+    padding: 15px;
+    box-sizing: border-box;
 }
 
 .header {
     text-align: center;
-    padding: 20px 0;
+    padding: 15px 0;
 }
 
 .logo {
-    height: 100px;
-    margin-bottom: 20px;
+    height: auto;
+    max-width: 80%;
+    max-height: 120px;
+    margin-bottom: 15px;
 }
 
 h1, h2, h3 {
     color: var(--light);
-    margin-bottom: 20px;
+    margin-bottom: 15px;
+    font-size: 1.5rem;
 }
 
-/* Estilos para o jogo */
+/* Layout do jogo para mobile */
 .game-board {
     display: flex;
-    gap: 30px;
-    margin-bottom: 30px;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
 }
 
 .current-number-container {
     text-align: center;
     background: rgba(255, 255, 255, 0.1);
-    padding: 20px;
-    border-radius: 10px;
-    min-width: 200px;
+    padding: 15px;
+    border-radius: 8px;
     backdrop-filter: blur(10px);
 }
 
 .current-number {
-    font-size: 5rem;
+    font-size: 3.5rem;
     font-weight: bold;
-    margin: 20px 0;
+    margin: 15px 0;
     color: var(--accent);
 }
 
 .drawn-numbers {
-    flex-grow: 1;
     background: rgba(255, 255, 255, 0.1);
-    padding: 20px;
-    border-radius: 10px;
+    padding: 15px;
+    border-radius: 8px;
     backdrop-filter: blur(10px);
 }
 
 .drawn-numbers-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 15px;
+    gap: 8px;
+    margin-top: 10px;
+    justify-content: center;
 }
 
 .drawn-number {
     background: var(--accent);
     color: white;
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
     font-weight: bold;
+    font-size: 0.9rem;
 }
 
 .winners-section {
     background: rgba(255, 255, 255, 0.1);
-    padding: 20px;
-    border-radius: 10px;
+    padding: 15px;
+    border-radius: 8px;
     backdrop-filter: blur(10px);
+    margin-bottom: 15px;
 }
 
 .winner-card {
     background: rgba(46, 204, 113, 0.1);
-    padding: 15px;
-    margin-bottom: 10px;
+    padding: 12px;
+    margin-bottom: 8px;
     border-radius: 5px;
     border-left: 4px solid var(--success);
 }
 
 .win-time {
-    font-size: 0.8em;
+    font-size: 0.7em;
     color: rgba(255, 255, 255, 0.6);
     margin-top: 5px;
 }
@@ -115,8 +122,8 @@ h1, h2, h3 {
 /* Confetti effect */
 .confetti {
     position: fixed;
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
     background-color: #f00;
     top: -10px;
     animation: confetti-fall 5s linear forwards;
@@ -126,5 +133,42 @@ h1, h2, h3 {
 @keyframes confetti-fall {
     to {
         transform: translateY(100vh) rotate(720deg);
+    }
+}
+
+/* Media Queries para tablets e desktops */
+@media (min-width: 768px) {
+    .container {
+        max-width: 1200px;
+        padding: 30px;
+    }
+    
+    .game-board {
+        flex-direction: row;
+        gap: 30px;
+    }
+    
+    .current-number-container {
+        min-width: 200px;
+    }
+    
+    .current-number {
+        font-size: 5rem;
+    }
+    
+    .drawn-number {
+        width: 40px;
+        height: 40px;
+    }
+    
+    h1, h2, h3 {
+        font-size: 2rem;
+    }
+}
+
+/* Otimização para telas muito grandes */
+@media (min-width: 1200px) {
+    body {
+        background-size: 100% 100%;
     }
 }
