@@ -16,7 +16,7 @@ body {
     background-size: cover;
     color: var(--light);
     margin: 15px;
-    padding: 0;
+    padding: 15px;
     min-height: 300vh;
 }
 
