@@ -15,9 +15,9 @@ body {
                 url('/static/images/bg.jpg') no-repeat center center fixed;
     background-size: cover;
     color: var(--light);
-    margin: 15px;
-    padding: 0.2px;
-    min-height: 300vh;
+    margin: 0.9pc;
+    padding 0;
+    min-height: 100vh;
 }
 
 .container {
