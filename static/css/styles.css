@@ -15,7 +15,7 @@ body {
                 url('/static/images/bg.jpg') no-repeat center center fixed;
     background-size: cover;
     color: var(--light);
-    margin: 30px;
+    margin: 10px;
     padding: 0;
     min-height: 100vh;
 }
