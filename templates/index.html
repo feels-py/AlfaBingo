@@ -8,42 +8,40 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 30px;
-        padding: 20px;
+        gap: 20px;
+        padding: 15px;
     }
     
     .current-number-container {
         text-align: center;
         background: rgba(0, 0, 0, 0.7);
-        padding: 30px;
+        padding: 20px;
         border-radius: 15px;
-        width: 80%;
+        width: 100%;
         max-width: 500px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     }
     
     .current-number {
-        font-size: 8rem;
+        font-size: 4rem;
         font-weight: bold;
-        margin: 20px 0;
+        margin: 15px 0;
         color: #FFD700;
-        text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
-        animation: pulse 1s infinite alternate;
+        text-shadow: 0 0 8px rgba(255, 215, 0, 0.7);
     }
     
     .drawn-numbers-container {
         background: rgba(0, 0, 0, 0.7);
-        padding: 20px;
+        padding: 15px;
         border-radius: 15px;
-        width: 90%;
-        max-width: 800px;
+        width: 100%;
     }
     
     .drawn-numbers-grid {
         display: grid;
-        grid-template-columns: repeat(10, 1fr);
-        gap: 10px;
-        margin-top: 20px;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 8px;
+        margin-top: 15px;
     }
     
     .drawn-number {
@@ -56,92 +54,104 @@
         justify-content: center;
         border-radius: 50%;
         font-weight: bold;
-        font-size: 1.2rem;
+        font-size: 1rem;
         transition: all 0.3s ease;
-    }
-    
-    .drawn-number.recent {
-        background: #FFD700;
-        color: #000;
-        transform: scale(1.1);
-        box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
     }
     
     .drawn-number.drawn {
         background: #e74c3c;
     }
     
-    .winners-container {
-        background: rgba(0, 0, 0, 0.7);
+    .drawn-number.recent {
+        background: #FFD700;
+        color: #000;
+        transform: scale(1.1);
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+        animation: pulse 0.5s ease-in-out;
+    }
+    
+    .winner-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
         padding: 20px;
-        border-radius: 15px;
-        width: 90%;
-        max-width: 800px;
-        margin-top: 20px;
+        animation: fadeIn 0.5s ease-out;
     }
     
     .winner-card {
-        background: rgba(46, 204, 113, 0.2);
-        padding: 15px;
-        margin: 10px 0;
-        border-radius: 8px;
-        border-left: 4px solid #2ecc71;
-    }
-    
-    .game-status {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: rgba(0, 0, 0, 0.7);
-        padding: 10px 20px;
-        border-radius: 20px;
-        color: white;
-        z-index: 100;
-    }
-    
-    .stats {
-        margin-top: 15px;
-        font-size: 1.2rem;
+        background: linear-gradient(135deg, #2ecc71, #27ae60);
+        padding: 25px;
+        border-radius: 15px;
+        text-align: center;
+        max-width: 90%;
+        box-shadow: 0 10px 30px rgba(46, 204, 113, 0.5);
+        animation: zoomIn 0.5s ease-out;
     }
     
     @keyframes pulse {
         0% { transform: scale(1); }
-        100% { transform: scale(1.05); }
-    }
-    
-    @keyframes highlight {
-        0% { transform: scale(1); }
         50% { transform: scale(1.2); }
         100% { transform: scale(1); }
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes zoomIn {
+        from { transform: scale(0.8); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+
+    @media (min-width: 768px) {
+        .current-number {
+            font-size: 6rem;
+        }
+        .drawn-numbers-grid {
+            grid-template-columns: repeat(10, 1fr);
+            gap: 10px;
+        }
+        .drawn-number {
+            font-size: 1.2rem;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="game-container">
-    <div class="game-status" id="gameStatus">
-        <i class="fas fa-circle" id="statusIndicator"></i>
-        <span id="statusText">Aguardando início</span>
-    </div>
-    
     <div class="current-number-container">
         <h2>Último Número Sorteado</h2>
         <div class="current-number" id="currentNumber">--</div>
         <div class="stats">
-            <p>Total sorteados: <span id="totalDrawn">0</span>/75</p>
+            <p>Sorteados: <span id="totalDrawn">0</span>/75</p>
         </div>
     </div>
     
     <div class="drawn-numbers-container">
         <h2>Números Sorteados</h2>
-        <div class="drawn-numbers-grid" id="drawnNumbersGrid">
-            <!-- Números serão inseridos aqui via JavaScript -->
-        </div>
+        <div class="drawn-numbers-grid" id="drawnNumbersGrid"></div>
     </div>
-    
-    <div class="winners-container" id="winnersContainer">
-        <h2>Ganhadores</h2>
-        <div id="winnersList"></div>
+</div>
+
+<div id="winnerScreen" class="winner-screen" style="display:none;">
+    <div class="winner-card">
+        <h2>🏆 TEMOS UM GANHADOR! 🏆</h2>
+        <h3 id="winnerName"></h3>
+        <p>Cartela: <span id="winnerId"></span></p>
+        <p>Horário: <span id="winnerTime"></span></p>
+        <button id="closeWinnerBtn" style="margin-top:20px; padding:10px 20px; background:#e74c3c; color:white; border:none; border-radius:5px; cursor:pointer;">
+            Fechar
+        </button>
     </div>
 </div>
 

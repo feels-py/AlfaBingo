@@ -3,12 +3,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentNumberEl = document.getElementById('currentNumber');
     const drawnNumbersGrid = document.getElementById('drawnNumbersGrid');
     const totalDrawnEl = document.getElementById('totalDrawn');
-    const winnersList = document.getElementById('winnersList');
-    const statusIndicator = document.getElementById('statusIndicator');
-    const statusText = document.getElementById('statusText');
-    const winnersContainer = document.getElementById('winnersContainer');
+    const winnerScreen = document.getElementById('winnerScreen');
+    const winnerName = document.getElementById('winnerName');
+    const winnerId = document.getElementById('winnerId');
+    const winnerTime = document.getElementById('winnerTime');
+    const closeWinnerBtn = document.getElementById('closeWinnerBtn');
     
-    // Cria os espaços para os números de 1 a 75
+    // Sons pré-carregados
+    const drawSound = new Audio('/static/sounds/draw.mp3');
+    const winSound = new Audio('/static/sounds/win.mp3');
+    
+    // Inicializa a grade de números
     function initializeNumberGrid() {
         drawnNumbersGrid.innerHTML = '';
         for (let i = 1; i <= 75; i++) {
@@ -20,17 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Atualiza o status do jogo
-    function updateGameStatus(isRunning) {
-        if (isRunning) {
-            statusIndicator.style.color = '#2ecc71';
-            statusText.textContent = 'Sorteio em andamento';
-        } else {
-            statusIndicator.style.color = '#e74c3c';
-            statusText.textContent = 'Sorteio pausado';
-        }
-    }
-    
     // Mostra um número sorteado
     function showDrawnNumber(number) {
         // Atualiza o número atual com animação
@@ -39,36 +33,32 @@ document.addEventListener('DOMContentLoaded', () => {
         void currentNumberEl.offsetWidth; // Trigger reflow
         currentNumberEl.style.animation = 'pulse 0.5s ease-in-out';
         
+        // Toca o som do sorteio
+        drawSound.currentTime = 0;
+        drawSound.play().catch(e => console.log("Autoplay prevented:", e));
+        
         // Destaca o número na grade
         const numberEl = document.getElementById(`number-${number}`);
         numberEl.classList.add('drawn', 'recent');
         
-        // Remove o destaque após 3 segundos
+        // Remove o destaque após 1 segundo
         setTimeout(() => {
             numberEl.classList.remove('recent');
-        }, 3000);
+        }, 1000);
     }
     
-    // Mostra um vencedor
-    function showWinner(winner) {
-        const winnerEl = document.createElement('div');
-        winnerEl.className = 'winner-card';
-        winnerEl.innerHTML = `
-            <h3>${winner.name}</h3>
-            <p>Cartela: ${winner.id}</p>
-            <p class="win-time">${winner.timestamp}</p>
-        `;
-        winnersList.prepend(winnerEl);
+    // Mostra a tela do vencedor
+    function showWinnerScreen(winner) {
+        winnerName.textContent = winner.name;
+        winnerId.textContent = winner.id;
+        winnerTime.textContent = winner.timestamp;
+        winnerScreen.style.display = 'flex';
         
-        // Mostra o container de vencedores se estiver oculto
-        winnersContainer.style.display = 'block';
+        // Toca o som da vitória
+        winSound.currentTime = 0;
+        winSound.play().catch(e => console.log("Autoplay prevented:", e));
         
-        // Animação de confete
-        createConfettiEffect();
-    }
-    
-    // Efeito de confete
-    function createConfettiEffect() {
+        // Efeito de confete
         confetti({
             particleCount: 150,
             spread: 70,
@@ -76,31 +66,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
+    // Fecha a tela do vencedor
+    closeWinnerBtn.addEventListener('click', () => {
+        winnerScreen.style.display = 'none';
+    });
+    
     // Inicializa a grade de números
     initializeNumberGrid();
     
     // Eventos do Socket.IO
-    socket.on('connect', () => {
-        console.log('Conectado ao servidor de sorteio');
-    });
-    
     socket.on('number_drawn', (data) => {
         showDrawnNumber(data.number);
         totalDrawnEl.textContent = data.total;
     });
     
     socket.on('new_winner', (winner) => {
-        showWinner(winner);
-        playWinSound();
-    });
-    
-    socket.on('game_paused', (data) => {
-        updateGameStatus(false);
-        if (data.reason === 'winner_found') {
-            const msg = 'Sorteio pausado automaticamente porque temos um ganhador!';
-            console.log(msg);
-            alert(msg);
-        }
+        showWinnerScreen(winner);
     });
     
     socket.on('game_update', (data) => {
@@ -111,17 +92,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         totalDrawnEl.textContent = data.numbers.length;
-        updateGameStatus(data.is_running);
-        
-        // Atualiza lista de ganhadores
-        if (data.winners && data.winners.length > 0) {
-            winnersList.innerHTML = '';
-            data.winners.forEach(winner => {
-                showWinner(winner);
-            });
-        } else {
-            winnersContainer.style.display = 'none';
-        }
     });
     
     socket.on('game_reset', () => {
@@ -129,14 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
         currentNumberEl.textContent = '--';
         initializeNumberGrid();
         totalDrawnEl.textContent = '0';
-        winnersList.innerHTML = '';
-        winnersContainer.style.display = 'none';
-        updateGameStatus(false);
+        winnerScreen.style.display = 'none';
     });
-    
-    // Efeitos de áudio
-    function playWinSound() {
-        const winSound = new Audio('/static/sounds/win.mp3');
-        winSound.play().catch(e => console.log("Autoplay prevented:", e));
-    }
 });
